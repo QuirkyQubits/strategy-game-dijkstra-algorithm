@@ -1,0 +1,7 @@
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\bin\Debug\StrategyGameDjikstraAlgo.exe.config
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\bin\Debug\StrategyGameDjikstraAlgo.exe
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\bin\Debug\StrategyGameDjikstraAlgo.pdb
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\obj\Debug\StrategyGameDjikstraAlgo.csprojAssemblyReference.cache
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\obj\Debug\StrategyGameDjikstraAlgo.csproj.CoreCompileInputs.cache
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\obj\Debug\StrategyGameDjikstraAlgo.exe
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo\obj\Debug\StrategyGameDjikstraAlgo.pdb

@@ -1,0 +1,17 @@
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\MinHeapUnitTests.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\MinHeapUnitTests.pdb
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\StrategyGameDjikstraAlgo.exe
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\StrategyGameDjikstraAlgo.pdb
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\StrategyGameDjikstraAlgo.exe.config
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\obj\Debug\MinHeapUnitTests.csprojAssemblyReference.cache
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\obj\Debug\MinHeapUnitTests.csproj.CoreCompileInputs.cache
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\obj\Debug\MinHeapUnitTests.csproj.CopyComplete
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\obj\Debug\MinHeapUnitTests.dll
+C:\Users\sea0s\source\repos\StrategyGameDjikstraAlgo\MinHeapUnitTests\obj\Debug\MinHeapUnitTests.pdb
