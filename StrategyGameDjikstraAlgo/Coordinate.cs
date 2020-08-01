@@ -47,5 +47,16 @@ namespace StrategyGameDjikstraAlgo
             // 1. negative numbers
             // 2. overflow for int.MaxValue
         }
+        public override bool Equals(Object obj)
+        {
+            Coordinate item = obj as Coordinate;
+
+            return item != null && r == item.r && c == item.c;
+        }
+
+        public override string ToString()
+        {
+            return $"({r}, {c})";
+        }
     }
 }

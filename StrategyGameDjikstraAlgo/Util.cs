@@ -14,5 +14,12 @@ namespace StrategyGameDjikstraAlgo
             lhs = rhs;
             rhs = temp;
         }
+
+        public static void Swap<T>(IList<T> list, int indexA, int indexB)
+        {
+            T tmp = list[indexA];
+            list[indexA] = list[indexB];
+            list[indexB] = tmp;
+        }
     }
 }

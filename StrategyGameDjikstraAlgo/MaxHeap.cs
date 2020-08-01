@@ -9,17 +9,17 @@ using StrategyGameDjikstraAlgo;
 namespace StrategyGameDjikstraAlgo
 {
     /// <summary>
-    /// This MinHeap does not support duplicates;
+    /// This MaxHeap does not support duplicates;
     /// each key's hashCode must be unique.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class MinHeap<T> : Heap<T> where T : IComparable<T>
+    public class MaxHeap<T> : Heap<T> where T : IComparable<T>
     {
-        public MinHeap() : base()
+        public MaxHeap() : base()
         {
         }
 
-        public MinHeap(IEnumerable<T> collection) : base(collection)
+        public MaxHeap(IEnumerable<T> collection) : base(collection)
         {
         }
 
@@ -49,7 +49,7 @@ namespace StrategyGameDjikstraAlgo
         protected override void Heapify(int heapIndex)
         {
             const string errorMessage
-                = "MinHeap::Heapify(): Specified minHeapIndex must be >= 1";
+                = "MaxHeap::Heapify(): Specified heapIndex must be >= 1";
 
             if (heapIndex <= 0)
                 throw new HeapException(errorMessage);
@@ -59,25 +59,25 @@ namespace StrategyGameDjikstraAlgo
             int l = Left(heapIndex);
             int r = Right(heapIndex);
 
-            int smallest;
+            int largest;
 
-            if (l <= HeapSize() && Get(l).CompareTo(Get(heapIndex)) < 0)
-                smallest = l;
+            if (l <= HeapSize() && Get(l).CompareTo(Get(heapIndex)) > 0)
+                largest = l;
             else
-                smallest = heapIndex;
+                largest = heapIndex;
 
-            if (r <= HeapSize() && Get(r).CompareTo(Get(smallest)) < 0)
-                smallest = r;
+            if (r <= HeapSize() && Get(r).CompareTo(Get(largest)) > 0)
+                largest = r;
 
-            if (smallest != heapIndex)
+            if (largest != heapIndex)
             {
                 // check these two lines
-                keyToHeapIndex[Get(heapIndex)] = smallest;
-                keyToHeapIndex[Get(smallest)] = heapIndex;
+                keyToHeapIndex[Get(heapIndex)] = largest;
+                keyToHeapIndex[Get(largest)] = heapIndex;
 
-                Util.Swap(heap, listIndex(heapIndex), listIndex(smallest));
+                Util.Swap(heap, listIndex(heapIndex), listIndex(largest));
 
-                Heapify(smallest);
+                Heapify(largest);
             }
         }
 
@@ -90,7 +90,7 @@ namespace StrategyGameDjikstraAlgo
             int tempHeapIndex = HeapSize();
 
             while (tempHeapIndex > 1
-                && Get(Parent(tempHeapIndex)).CompareTo(Get(tempHeapIndex)) > 0)
+                && Get(Parent(tempHeapIndex)).CompareTo(Get(tempHeapIndex)) < 0)
             {
                 keyToHeapIndex[Get(tempHeapIndex)] = Parent(tempHeapIndex);
                 keyToHeapIndex[Get(Parent(tempHeapIndex))] = tempHeapIndex;
@@ -104,41 +104,41 @@ namespace StrategyGameDjikstraAlgo
         }
 
         /// <summary>
-        /// Public interface method of decreaseKey.
+        /// Public interface method of IncreaseKey.
         /// </summary>
         /// <param name="oldKey"></param>
         /// <param name="newKey"></param>
-        public void DecreaseKey(T oldKey, T newKey)
+        public void IncreaseKey(T oldKey, T newKey)
         {
             // first check if key in dict
 
             const string errorMessage
-                = "MinHeap::DecreaseKey(): oldKey not in dict";
+                = "MaxHeap::IncreaseKey(): oldKey not in dict";
 
             if (!keyToHeapIndex.ContainsKey(oldKey))
                 throw new HeapException(errorMessage);
 
             Debug.Assert(keyToHeapIndex.ContainsKey(oldKey), errorMessage);
 
-            DecreaseKey(keyToHeapIndex[oldKey], newKey);
+            IncreaseKey(keyToHeapIndex[oldKey], newKey);
         }
 
         /// <summary>
-        /// Helper method of the public method DecreaseKey.
+        /// Helper method of the public method IncreaseKey.
         /// </summary>
         /// <param name="heapIndex"></param>
         /// <param name="key"></param>
-        private void DecreaseKey(int heapIndex, T key)
+        private void IncreaseKey(int heapIndex, T key)
         {
             CheckHeapIndex(heapIndex);
 
             const string errorMessage
-                = "MinHeap::DecreaseKey(): New key is larger than old key";
+                = "MaxHeap::IncreaseKey(): New key is smaller than old key";
 
-            if (key.CompareTo(Get(heapIndex)) > 0)
+            if (key.CompareTo(Get(heapIndex)) < 0)
                 throw new HeapException(errorMessage);
 
-            Debug.Assert(key.CompareTo(Get(heapIndex)) <= 0, errorMessage);
+            Debug.Assert(key.CompareTo(Get(heapIndex)) >= 0, errorMessage);
 
             // possible time savings tweak: check for unncessary steps
             // would also need to add oldKey param
@@ -152,16 +152,13 @@ namespace StrategyGameDjikstraAlgo
             }
             */
 
-            // need this?
-            /*
             keyToHeapIndex.Remove(Get(heapIndex));
             keyToHeapIndex.Add(key, heapIndex);
-            */
 
             Set(heapIndex, key);
 
             while (heapIndex > 1
-                && Get(Parent(heapIndex)).CompareTo(Get(heapIndex)) > 0) {
+                && Get(Parent(heapIndex)).CompareTo(Get(heapIndex)) < 0) {
 
                 keyToHeapIndex[Get(heapIndex)] = Parent(heapIndex);
                 keyToHeapIndex[Get(Parent(heapIndex))] = heapIndex;

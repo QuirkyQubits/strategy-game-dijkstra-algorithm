@@ -61,20 +61,35 @@ public static class MainClass
         Tile[,] tiles,
         Coordinate coord)
     {
+        const string errorMessage
+                = "MainClass::GetAdjacentTiles(): Specified coordinate not in bounds";
+
+        if (!inBounds(coord))
+            throw new MainClassException(errorMessage);
+
+        Debug.Assert(inBounds(coord), errorMessage);
+
         Coordinate leftCoord = coord.Left();
         Coordinate downCoord = coord.Down();
         Coordinate rightCoord = coord.Right();
         Coordinate upCoord = coord.Up();
 
-        Tile leftTile = tiles[leftCoord.r, leftCoord.c];
-        Tile downTile = tiles[downCoord.r, downCoord.c];
-        Tile rightTile = tiles[rightCoord.r, rightCoord.c];
-        Tile upTile = tiles[upCoord.r, upCoord.c];
+        Tile leftTile = inBounds(leftCoord) ? tiles[leftCoord.r, leftCoord.c] : null;
+        Tile downTile = inBounds(downCoord) ? tiles[downCoord.r, downCoord.c] : null;
+        Tile rightTile = inBounds(rightCoord) ? tiles[rightCoord.r, rightCoord.c] : null;
+        Tile upTile = inBounds(upCoord) ? tiles[upCoord.r, upCoord.c] : null;
 
-        yield return new TileCoordinate(leftTile, leftCoord);
-        yield return new TileCoordinate(downTile, downCoord);
-        yield return new TileCoordinate(rightTile, rightCoord);
-        yield return new TileCoordinate(upTile, upCoord);
+        if (inBounds(leftCoord))
+            yield return new TileCoordinate(leftTile, leftCoord);
+
+        if (inBounds(downCoord))
+            yield return new TileCoordinate(downTile, downCoord);
+
+        if (inBounds(rightCoord))
+            yield return new TileCoordinate(rightTile, rightCoord);
+
+        if (inBounds(upCoord))
+            yield return new TileCoordinate(upTile, upCoord);
     }
 
 
@@ -84,73 +99,136 @@ public static class MainClass
     /// This is implemented using a modified form of Djikstra's algorithm.
     /// </summary>
     /// <param name="tiles"></param>
-    /// <param name="startingCoordinate"></param>
-    private static void FindReachableTiles(Tile[,] tiles, Coordinate startingCoordinate)
+    /// <param name="startCoord"></param>
+    private static void FindReachableTiles(
+        Dictionary<Coordinate, int> dist,
+        Dictionary<Coordinate, Coordinate> prev,
+        Tile[,] tiles,
+        Coordinate startCoord,
+        int movementPoints)
     {
-        var Q = new MinHeap<TileCoordinateNode>();
+        var frontier = new MinHeap<TileCoordinateNode>();
 
-        var dist = new Dictionary<Coordinate, int>();
-        var prev = new Dictionary<Coordinate, Coordinate>();
+        TileCoordinate startTileCoordinate = new TileCoordinate(
+            tiles[startCoord.r, startCoord.c],
+            startCoord);
 
-        dist[startingCoordinate] = 0;
+        TileCoordinateNode startNode = new TileCoordinateNode(startTileCoordinate, 0);
 
-        // iterate over all cells, filling the necessary tables of info
-        // for proper operation of Djikstra's algorithm
+        frontier.Insert(startNode);
+
         for (int r = 0; r < ROWS; ++r)
         {
             for (int c = 0; c < COLS; ++c)
             {
                 Coordinate coord = new Coordinate(r, c);
 
-                if (coord != startingCoordinate)
+                if (!coord.Equals(startCoord))
                 {
-                    dist.Add(coord, int.MaxValue); // unknown distance
-                    prev.Add(coord, null); // unknown predecessor
+                    dist[coord] = int.MaxValue;
+                    prev[coord] = null;
                 }
-
-                // insert with priority
-
-                TileCoordinate tileCoordinate = new TileCoordinate(tiles[r, c], coord);
-                TileCoordinateNode node = new TileCoordinateNode(tileCoordinate, int.MaxValue);
-
-                Q.Insert(node);
-
-
+                else
+                {
+                    dist[startCoord] = 0;
+                    prev[startCoord] = null; // doesn't matter for start coord
+                }
             }
         }
 
-        while (Q.GetHeapSize() > 0)
+        while (frontier.HeapSize() > 0)
         {
-            TileCoordinateNode node = Q.Pop();
-            TileCoordinate tileCoordate = node.tileCoordinate;
-            
+            TileCoordinateNode node = frontier.Pop();
+            TileCoordinate tileCoordinate = node.tileCoordinate;
+
             foreach (TileCoordinate adjacent
-                in GetAdjacentTiles(tiles, tileCoordate.coordinate))
+                in GetAdjacentTiles(tiles, tileCoordinate.coordinate))
             {
-                int calculatedDist = dist[tileCoordate.coordinate]
-                    + tileCoordate.tile.movementCost;
+                // watch for overflow here
+                int calculatedDist = dist[tileCoordinate.coordinate]
+                    + adjacent.tile.movementCost;
 
-                if (calculatedDist < dist[tileCoordate.coordinate])
+                bool calculatedDistPreferrable
+                    = dist[adjacent.coordinate] == int.MaxValue
+                    || calculatedDist < dist[adjacent.coordinate];
+
+                if (calculatedDistPreferrable && calculatedDist <= movementPoints)
                 {
-                    dist[tileCoordate.coordinate] = calculatedDist;
-                    prev[tileCoordate.coordinate] = adjacent.coordinate;
+                    dist[adjacent.coordinate] = calculatedDist;
+                    prev[adjacent.coordinate] = tileCoordinate.coordinate;
 
-                    /*
-                    // how to implement decrease key?
-                    int heapIndexOfNode = GetHeapIndexOfNode();
-                    node.totalCost = calculatedDist;
-                    Q.DecreaseKey(heapIndexOfNode, node);
-                    */
+                    TileCoordinateNode adjacentNode
+                        = new TileCoordinateNode(adjacent, calculatedDist);
+
+                    if (!frontier.Contains(adjacentNode))
+                    {
+                        frontier.Insert(adjacentNode);
+                    }
+                    else
+                    {
+                        frontier.DecreaseKey(adjacentNode, adjacentNode);
+                    }
                 }
+            }
+            
+        }
+    }
+
+    private static void ProcessResults(
+        Dictionary<Coordinate, int> dist,
+        Dictionary<Coordinate, Coordinate> prev,
+        Coordinate startingCoord)
+    {
+
+        // distance from starting coordinate to each node:
+
+        foreach (KeyValuePair<Coordinate, int> entry in dist)
+        {
+            Coordinate targetCoordinate = entry.Key;
+            int distanceToTarget = entry.Value;
+
+            if (distanceToTarget != int.MaxValue)
+            {
+                Console.WriteLine($"Distance from {startingCoord}" +
+                    $" to {targetCoordinate}" +
+                    $" is: {distanceToTarget}");
+            }
+        }
+
+        // find paths to starting coordinate; read backwards
+
+        foreach (KeyValuePair<Coordinate, Coordinate> entry in prev)
+        {
+            Coordinate currentCoord = entry.Key;
+
+            if (currentCoord.Equals(startingCoord) || prev[currentCoord] != null)
+            {
+                string ans = currentCoord.ToString();
+
+                // all paths lead to the starting coordinate
+                // and the starting coordinate's prev is null
+                while (prev[currentCoord] != null)
+                {
+                    ans = $"{prev[currentCoord]}, {ans}";
+                    currentCoord = prev[currentCoord];
+                }
+
+                Console.WriteLine(ans);
             }
         }
     }
 
     public static void Main()
     {
-        Tile[,] tiles = new Tile[5, 5];
+        Tile[,] tiles = new Tile[ROWS, COLS];
         InitializeTiles(tiles);
         Coordinate startingCoordinate = new Coordinate(2, 1);
-        FindReachableTiles(tiles, startingCoordinate);
+
+        var dist = new Dictionary<Coordinate, int>();
+        var prev = new Dictionary<Coordinate, Coordinate>();
+
+        FindReachableTiles(dist, prev, tiles, startingCoordinate, 3);
+
+        ProcessResults(dist, prev, startingCoordinate);
     }
 }

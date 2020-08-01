@@ -25,5 +25,13 @@ namespace StrategyGameDjikstraAlgo
         {
             return tileCoordinate.coordinate.GetHashCode();
         }
+
+        public override bool Equals(object obj)
+        {
+            TileCoordinateNode item = obj as TileCoordinateNode;
+
+            return item != null
+                && tileCoordinate.coordinate.Equals(item.tileCoordinate.coordinate);
+        }
     }
 }
