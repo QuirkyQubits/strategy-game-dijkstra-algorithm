@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrategyGameDjikstraAlgo", "StrategyGameDjikstraAlgo\StrategyGameDjikstraAlgo.csproj", "{523F06A5-1DAE-4958-830F-72C48A0E30F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinHeapUnitTests", "MinHeapUnitTests\MinHeapUnitTests.csproj", "{7225C122-9378-4BEA-BA3B-F3D2701174F0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "MinHeapUnitTests\UnitTests.csproj", "{7225C122-9378-4BEA-BA3B-F3D2701174F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -101,8 +101,8 @@ public static class MainClass
     /// <param name="tiles"></param>
     /// <param name="startCoord"></param>
     private static void FindReachableTiles(
-        Dictionary<Coordinate, int> dist,
-        Dictionary<Coordinate, Coordinate> prev,
+        int[,] dist,
+        Coordinate[,] prev,
         Tile[,] tiles,
         Coordinate startCoord,
         int movementPoints)
@@ -125,13 +125,13 @@ public static class MainClass
 
                 if (!coord.Equals(startCoord))
                 {
-                    dist[coord] = int.MaxValue;
-                    prev[coord] = null;
+                    dist[coord.r, coord.c] = int.MaxValue;
+                    prev[coord.r, coord.c] = null;
                 }
                 else
                 {
-                    dist[startCoord] = 0;
-                    prev[startCoord] = null; // doesn't matter for start coord
+                    dist[coord.r, coord.c] = 0;
+                    prev[coord.r, coord.c] = null; // doesn't matter for start coord
                 }
             }
         }
@@ -140,25 +140,28 @@ public static class MainClass
         {
             TileCoordinateNode node = frontier.Pop();
             TileCoordinate tileCoordinate = node.tileCoordinate;
+            Coordinate coordinate = tileCoordinate.coordinate;
 
-            foreach (TileCoordinate adjacent
-                in GetAdjacentTiles(tiles, tileCoordinate.coordinate))
+            foreach (TileCoordinate adjacentTileCoord
+                in GetAdjacentTiles(tiles, coordinate))
             {
+                Coordinate adjacentCoord = adjacentTileCoord.coordinate;
+
                 // watch for overflow here
-                int calculatedDist = dist[tileCoordinate.coordinate]
-                    + adjacent.tile.movementCost;
+                int calculatedDist = dist[coordinate.r, coordinate.c]
+                    + adjacentTileCoord.tile.movementCost;
 
                 bool calculatedDistPreferrable
-                    = dist[adjacent.coordinate] == int.MaxValue
-                    || calculatedDist < dist[adjacent.coordinate];
+                    = dist[adjacentCoord.r, adjacentCoord.c] == int.MaxValue
+                    || calculatedDist < dist[adjacentCoord.r, adjacentCoord.c];
 
                 if (calculatedDistPreferrable && calculatedDist <= movementPoints)
                 {
-                    dist[adjacent.coordinate] = calculatedDist;
-                    prev[adjacent.coordinate] = tileCoordinate.coordinate;
+                    dist[adjacentCoord.r, adjacentCoord.c] = calculatedDist;
+                    prev[adjacentCoord.r, adjacentCoord.c] = coordinate;
 
                     TileCoordinateNode adjacentNode
-                        = new TileCoordinateNode(adjacent, calculatedDist);
+                        = new TileCoordinateNode(adjacentTileCoord, calculatedDist);
 
                     if (!frontier.Contains(adjacentNode))
                     {
@@ -175,45 +178,52 @@ public static class MainClass
     }
 
     private static void ProcessResults(
-        Dictionary<Coordinate, int> dist,
-        Dictionary<Coordinate, Coordinate> prev,
+        int[,] dist,
+        Coordinate[,] prev,
         Coordinate startingCoord)
     {
 
         // distance from starting coordinate to each node:
 
-        foreach (KeyValuePair<Coordinate, int> entry in dist)
+        for (int r = 0; r < ROWS; ++r)
         {
-            Coordinate targetCoordinate = entry.Key;
-            int distanceToTarget = entry.Value;
-
-            if (distanceToTarget != int.MaxValue)
+            for (int c = 0; c < COLS; ++c)
             {
-                Console.WriteLine($"Distance from {startingCoord}" +
-                    $" to {targetCoordinate}" +
-                    $" is: {distanceToTarget}");
+                Coordinate targetCoordinate = new Coordinate(r, c);
+                int distanceToTarget = dist[r, c];
+
+                if (distanceToTarget != int.MaxValue)
+                {
+                    Console.WriteLine($"Distance from {startingCoord}" +
+                        $" to {targetCoordinate}" +
+                        $" is: {distanceToTarget}");
+                }
             }
         }
 
         // find paths to starting coordinate; read backwards
 
-        foreach (KeyValuePair<Coordinate, Coordinate> entry in prev)
+        for (int r = 0; r < ROWS; ++r)
         {
-            Coordinate currentCoord = entry.Key;
-
-            if (currentCoord.Equals(startingCoord) || prev[currentCoord] != null)
+            for (int c = 0; c < COLS; ++c)
             {
-                string ans = currentCoord.ToString();
+                Coordinate currentCoord = new Coordinate(r, c);
 
-                // all paths lead to the starting coordinate
-                // and the starting coordinate's prev is null
-                while (prev[currentCoord] != null)
+                if (currentCoord.Equals(startingCoord)
+                    || prev[currentCoord.r, currentCoord.c] != null)
                 {
-                    ans = $"{prev[currentCoord]}, {ans}";
-                    currentCoord = prev[currentCoord];
-                }
+                    string ans = currentCoord.ToString();
 
-                Console.WriteLine(ans);
+                    // all paths lead to the starting coordinate
+                    // and the starting coordinate's prev is null
+                    while (prev[currentCoord.r, currentCoord.c] != null)
+                    {
+                        ans = $"{prev[currentCoord.r, currentCoord.c]}, {ans}";
+                        currentCoord = prev[currentCoord.r, currentCoord.c];
+                    }
+
+                    Console.WriteLine(ans);
+                }
             }
         }
     }
@@ -224,8 +234,8 @@ public static class MainClass
         InitializeTiles(tiles);
         Coordinate startingCoordinate = new Coordinate(2, 1);
 
-        var dist = new Dictionary<Coordinate, int>();
-        var prev = new Dictionary<Coordinate, Coordinate>();
+        int[,] dist = new int[ROWS, COLS];
+        Coordinate[,] prev = new Coordinate[ROWS, COLS];
 
         FindReachableTiles(dist, prev, tiles, startingCoordinate, 3);
 
