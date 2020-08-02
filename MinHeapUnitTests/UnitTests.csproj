@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MaxHeapUnitTests.cs" />
+    <Compile Include="MainClassUnitTests.cs" />
     <Compile Include="MinHeapUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

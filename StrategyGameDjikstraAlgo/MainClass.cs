@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Web.Script.Serialization;
 using StrategyGameDjikstraAlgo;
 
 public static class MainClass
@@ -50,6 +51,62 @@ public static class MainClass
         tiles[4, 2] = new Tile(1);
         tiles[4, 3] = new Tile(1);
         tiles[4, 4] = new Tile(1);
+    }
+
+    /// <summary>
+    /// Still need to test this class.
+    /// 
+    /// </summary>
+    /// <param name="tiles">Comes in uninitialized, and is initialzied
+    /// based in the read values of ROWS and COLS in the JSON file</param>
+    /// <param name="json"></param>
+    public static void InitializeTiles(out Tile[,] tiles, string json)
+    {
+        JavaScriptSerializer serializer = new JavaScriptSerializer();
+        dynamic outerJson = serializer.Deserialize<object>(json);
+        int readRows = outerJson["ROWS"];
+        int readCols = outerJson["COLS"];
+        dynamic readTilesArray = outerJson["tilesArray"];
+
+        if (readRows < 1)
+        {
+            throw new MainClassException("MainClass::InitializeTiles(): readRows < 1");
+        }
+        if (readCols < 1)
+        {
+            throw new MainClassException("MainClass::InitializeTiles(): readCols < 1");
+        }
+
+        tiles = new Tile[readRows, readCols];
+
+        for (int r = 0; r < readRows; ++r)
+        {
+            for (int c = 0; c < readCols; ++c)
+            {
+                dynamic tile = readTilesArray[r][c];
+
+                if (tile["tileType"].Equals("grass"))
+                {
+                    tiles[r, c] = new Tile(1);
+                }
+                else if (tile["tileType"].Equals("water"))
+                {
+                    tiles[r, c] = new Tile(3);
+                }
+                else if (tile["tileType"].Equals("marsh"))
+                {
+                    tiles[r, c] = new Tile(2);
+                }
+                else if (tile["tileType"].Equals("plasma"))
+                {
+                    tiles[r, c] = new Tile(0);
+                }
+                else
+                {
+                    throw new MainClassException("MainClass::InitializeTiles(): unrecognized tileType");
+                }
+            }
+        }
     }
 
     /// <summary>
