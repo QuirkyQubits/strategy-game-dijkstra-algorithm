@@ -66,7 +66,7 @@ public static class MainClass
     /// <param name="tiles">Comes in uninitialized, and is initialzied
     /// based in the read values of ROWS and COLS in the JSON file</param>
     /// <param name="json"></param>
-    public static void InitializeTiles(out Tile[,] tiles, string json)
+    public static Tile[,] GetTiles(string json)
     {
         JavaScriptSerializer serializer = new JavaScriptSerializer();
         dynamic outerJson = serializer.Deserialize<object>(json);
@@ -83,7 +83,7 @@ public static class MainClass
             throw new MainClassException("MainClass::InitializeTiles(): readCols < 1");
         }
 
-        tiles = new Tile[readRows, readCols];
+        Tile[,] tiles = new Tile[readRows, readCols];
 
         for (int r = 0; r < readRows; ++r)
         {
@@ -113,6 +113,8 @@ public static class MainClass
                 }
             }
         }
+
+        return tiles;
     }
 
     /// <summary>
@@ -315,13 +317,14 @@ public static class MainClass
         ProcessResults(ROWS, COLS, dist, prev, startingCoordinate);
     }
 
-    public static void RunMainSequence(string pathToJsonFile, Coordinate startCoord, int movementPoints)
+    public static void RunMainSequence(
+        string pathToJsonFile,
+        Coordinate startCoord,
+        int movementPoints)
     {
         string json = File.ReadAllText(pathToJsonFile);
 
-        Tile[,] tiles = null;
-
-        InitializeTiles(out tiles, json);
+        Tile[,] tiles = GetTiles(json);
 
         int rows = Util.GetRows(tiles);
         int cols = Util.GetCols(tiles);
@@ -336,10 +339,11 @@ public static class MainClass
 
     public static void Main()
     {
-        // MainMethod1();
+        string pathToExportFolder = Util.GetPathToExportFolder();
+        string pathToJsonFile = $@"{pathToExportFolder}\strategy-game-export-4.json";
 
         RunMainSequence(
-            Util.GetPathToExportFolder() + @"\strategy-game-export-4.json",
+            pathToJsonFile,
             new Coordinate(1, 0),
             3);
     }

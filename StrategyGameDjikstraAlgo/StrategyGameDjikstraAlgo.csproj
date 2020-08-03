@@ -37,16 +37,20 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameException.cs" />
     <Compile Include="Coordinate.cs" />
+    <Compile Include="Game.cs" />
     <Compile Include="Heap.cs" />
     <Compile Include="MainClass.cs" />
     <Compile Include="MainClassException.cs" />
     <Compile Include="MaxHeap.cs" />
     <Compile Include="MinHeap.cs" />
     <Compile Include="HeapException.cs" />
+    <Compile Include="Stats.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="TileCoordinate.cs" />
     <Compile Include="TileCoordinateNode.cs" />
+    <Compile Include="Unit.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
