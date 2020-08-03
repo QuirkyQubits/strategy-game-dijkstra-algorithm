@@ -21,5 +21,24 @@ namespace StrategyGameDjikstraAlgo
             list[indexA] = list[indexB];
             list[indexB] = tmp;
         }
+
+        public static int GetRows<T>(T[,] array)
+        {
+            return array.GetUpperBound(0) - array.GetLowerBound(0) + 1;
+        }
+
+        public static int GetCols<T>(T[,] array)
+        {
+            return array.GetUpperBound(1) - array.GetLowerBound(1) + 1;
+        }
+
+        /// <summary>
+        /// Returns the file path to the export folder.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetPathToExportFolder()
+        {
+            return @"D:\CS\djikstra-problem\json-exports";
+        }
     }
 }

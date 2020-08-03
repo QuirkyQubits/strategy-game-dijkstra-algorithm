@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Web.Script.Serialization;
 using StrategyGameDjikstraAlgo;
 
 public static class MainClass
 {
-    static int ROWS = 5;
-    static int COLS = 5;
-
-    private static Boolean inBounds(Coordinate coordinate)
+    public static Boolean inBounds(Coordinate coordinate, int rows, int cols)
     {
-        return coordinate.r >= 0 && coordinate.r <= ROWS - 1
-            && coordinate.c >= 0 && coordinate.c <= COLS - 1;
+        return coordinate.r >= 0 && coordinate.r <= rows - 1
+            && coordinate.c >= 0 && coordinate.c <= cols - 1;
+    }
+
+    public static Boolean inBounds(Coordinate coordinate, Tile[,] tiles)
+    {
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+
+        return inBounds(coordinate, rows, cols);
     }
 
     private static void InitializeTiles(Tile[,] tiles)
@@ -114,38 +120,41 @@ public static class MainClass
     /// </summary>
     /// <param name="tiles"></param>
     /// <param name="startingCoordinate"></param>
-    private static IEnumerable<TileCoordinate> GetAdjacentTiles(
+    public static IEnumerable<TileCoordinate> GetAdjacentTiles(
         Tile[,] tiles,
         Coordinate coord)
     {
         const string errorMessage
                 = "MainClass::GetAdjacentTiles(): Specified coordinate not in bounds";
 
-        if (!inBounds(coord))
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+
+        if (!inBounds(coord, tiles))
             throw new MainClassException(errorMessage);
 
-        Debug.Assert(inBounds(coord), errorMessage);
+        Debug.Assert(inBounds(coord, tiles), errorMessage);
 
         Coordinate leftCoord = coord.Left();
         Coordinate downCoord = coord.Down();
         Coordinate rightCoord = coord.Right();
         Coordinate upCoord = coord.Up();
 
-        Tile leftTile = inBounds(leftCoord) ? tiles[leftCoord.r, leftCoord.c] : null;
-        Tile downTile = inBounds(downCoord) ? tiles[downCoord.r, downCoord.c] : null;
-        Tile rightTile = inBounds(rightCoord) ? tiles[rightCoord.r, rightCoord.c] : null;
-        Tile upTile = inBounds(upCoord) ? tiles[upCoord.r, upCoord.c] : null;
+        Tile leftTile = inBounds(leftCoord,   tiles) ? tiles[leftCoord.r, leftCoord.c] : null;
+        Tile downTile = inBounds(downCoord,   tiles) ? tiles[downCoord.r, downCoord.c] : null;
+        Tile rightTile = inBounds(rightCoord, tiles) ? tiles[rightCoord.r, rightCoord.c] : null;
+        Tile upTile = inBounds(upCoord,       tiles) ? tiles[upCoord.r, upCoord.c] : null;
 
-        if (inBounds(leftCoord))
+        if (inBounds(leftCoord, tiles))
             yield return new TileCoordinate(leftTile, leftCoord);
 
-        if (inBounds(downCoord))
+        if (inBounds(downCoord, tiles))
             yield return new TileCoordinate(downTile, downCoord);
 
-        if (inBounds(rightCoord))
+        if (inBounds(rightCoord, tiles))
             yield return new TileCoordinate(rightTile, rightCoord);
 
-        if (inBounds(upCoord))
+        if (inBounds(upCoord, tiles))
             yield return new TileCoordinate(upTile, upCoord);
     }
 
@@ -157,7 +166,9 @@ public static class MainClass
     /// </summary>
     /// <param name="tiles"></param>
     /// <param name="startCoord"></param>
-    private static void FindReachableTiles(
+    public static void FindReachableTiles(
+        int rows,
+        int cols,
         int[,] dist,
         Coordinate[,] prev,
         Tile[,] tiles,
@@ -174,9 +185,9 @@ public static class MainClass
 
         frontier.Insert(startNode);
 
-        for (int r = 0; r < ROWS; ++r)
+        for (int r = 0; r < rows; ++r)
         {
-            for (int c = 0; c < COLS; ++c)
+            for (int c = 0; c < cols; ++c)
             {
                 Coordinate coord = new Coordinate(r, c);
 
@@ -234,7 +245,9 @@ public static class MainClass
         }
     }
 
-    private static void ProcessResults(
+    public static void ProcessResults(
+        int rows,
+        int cols,
         int[,] dist,
         Coordinate[,] prev,
         Coordinate startingCoord)
@@ -242,9 +255,9 @@ public static class MainClass
 
         // distance from starting coordinate to each node:
 
-        for (int r = 0; r < ROWS; ++r)
+        for (int r = 0; r < rows; ++r)
         {
-            for (int c = 0; c < COLS; ++c)
+            for (int c = 0; c < cols; ++c)
             {
                 Coordinate targetCoordinate = new Coordinate(r, c);
                 int distanceToTarget = dist[r, c];
@@ -260,9 +273,9 @@ public static class MainClass
 
         // find paths to starting coordinate; read backwards
 
-        for (int r = 0; r < ROWS; ++r)
+        for (int r = 0; r < rows; ++r)
         {
-            for (int c = 0; c < COLS; ++c)
+            for (int c = 0; c < cols; ++c)
             {
                 Coordinate currentCoord = new Coordinate(r, c);
 
@@ -285,8 +298,11 @@ public static class MainClass
         }
     }
 
-    public static void Main()
+    public static void MainMethod1()
     {
+        int ROWS = 5;
+        int COLS = 5;
+
         Tile[,] tiles = new Tile[ROWS, COLS];
         InitializeTiles(tiles);
         Coordinate startingCoordinate = new Coordinate(2, 1);
@@ -294,8 +310,37 @@ public static class MainClass
         int[,] dist = new int[ROWS, COLS];
         Coordinate[,] prev = new Coordinate[ROWS, COLS];
 
-        FindReachableTiles(dist, prev, tiles, startingCoordinate, 3);
+        FindReachableTiles(ROWS, COLS, dist, prev, tiles, startingCoordinate, 3);
 
-        ProcessResults(dist, prev, startingCoordinate);
+        ProcessResults(ROWS, COLS, dist, prev, startingCoordinate);
+    }
+
+    public static void RunMainSequence(string pathToJsonFile, Coordinate startCoord, int movementPoints)
+    {
+        string json = File.ReadAllText(pathToJsonFile);
+
+        Tile[,] tiles = null;
+
+        InitializeTiles(out tiles, json);
+
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+
+        int[,] dist = new int[rows, cols];
+        Coordinate[,] prev = new Coordinate[rows, cols];
+
+        FindReachableTiles(rows, cols, dist, prev, tiles, startCoord, movementPoints);
+
+        ProcessResults(rows, cols, dist, prev, startCoord);
+    }
+
+    public static void Main()
+    {
+        // MainMethod1();
+
+        RunMainSequence(
+            Util.GetPathToExportFolder() + @"\strategy-game-export-4.json",
+            new Coordinate(1, 0),
+            3);
     }
 }

@@ -11,11 +11,13 @@ namespace MainClassUnitTests
     public class MainClassUnitTests
     {
         [TestMethod]
-        public void TestInitializeTiles()
+        public void TestInitializeTiles1()
         {
             Tile[,] tiles = null;
 
-            string json = File.ReadAllText(@"D:\CS\djikstra-problem\json-exports\strategy-game-export-3.json", Encoding.UTF8);
+            string json = File.ReadAllText(
+                @"D:\CS\djikstra-problem\json-exports\strategy-game-export-3.json",
+                Encoding.UTF8);
 
             MainClass.InitializeTiles(out tiles, json);
 
