@@ -4,36 +4,43 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using StrategyGameDjikstraAlgo;
 
 namespace StrategyGameDjikstraAlgo
 {
-    public enum UnitTypes {
-        Soldier,
-        Seaman
-    }
-
     public class Unit
     {
         public UnitTypes unitType;
         public int movementPoints;
         public Stats stats;
-        public Coordinate currentLocation;
+        public Coordinate location;
         public string name;
+        public Teams team;
 
-        private Unit[,] board;
+        public Unit[,] board;
+        public Tile[,] tiles;
 
         public Unit(
-            Unit[,] board,
             UnitTypes unitType,
             int movementPoints,
+            Stats stats,
+            Coordinate location,
             string name,
-            Stats stats)
+            Teams team,
+
+            Unit[,] board,
+            Tile[,] tiles)
         {
-            this.board = board;
+            
             this.unitType = unitType;
             this.movementPoints = movementPoints;
             this.stats = stats;
+            this.location = location;
             this.name = name;
+            this.team = team;
+
+            this.board = board;
+            this.tiles = tiles;
         }
 
         public bool Dead()
@@ -43,45 +50,62 @@ namespace StrategyGameDjikstraAlgo
 
         public void TakeTurn()
         {
-            if (!Dead())
-            {
-                Move();
-                Attack();
-            }
+            CheckUnitIsNotDead(this);
+            Move();
+            Attack();
         }
 
         //moves the unit around the gameBoard
         private void Move() {
 
-            checkUnitIsNotDead();
+            CheckUnitIsNotDead(this);
 
-            Coordinate target = GetUserInputForMovement();
+            var djikstraOptions = MainClass.FindReachableTiles(
+                this,
+                tiles);
+
+            Coordinate target = GetUserInputForMovement(djikstraOptions);
 
             // move there
-            if (!target.Equals(currentLocation))
+            if (!target.Equals(location))
             {
-                board[currentLocation.r, currentLocation.c] = null;
-                currentLocation = target;
-                board[currentLocation.r, currentLocation.c] = this;
+                board[location.r, location.c] = null;
+                location = target;
+                board[location.r, location.c] = this;
             }
         }
 
         private void Attack() {
 
-            checkUnitIsNotDead();
+            CheckUnitIsNotDead(this);
 
-            Coordinate targetCoord = GetUserInputForAttack();
+            HashSet<Coordinate> attackOptions = MainClass.FindAttackableTiles(
+                this,
+                board);
 
-            Unit unitToAttack = board[targetCoord.r, targetCoord.c];
+            if (attackOptions.Any())
+            {
+                Coordinate targetCoord = GetUserInputForAttack(attackOptions);
 
-            checkTargetToAttackIsNotNull(unitToAttack);
+                Unit unitToAttack = board[targetCoord.r, targetCoord.c];
 
-            unitToAttack.stats.hp -= stats.atk;
+                CheckTargetToAttackIsNotNull(unitToAttack);
+
+                CheckUnitIsNotDead(unitToAttack);
+
+                unitToAttack.stats.hp -= stats.atk;
+
+                if (unitToAttack.Dead())
+                {
+                    // remove from board
+                    board[targetCoord.r, targetCoord.c] = null;
+                }
+            }
         }
 
-        private void checkUnitIsNotDead()
+        private void CheckUnitIsNotDead(Unit unit)
         {
-            bool unitIsDead = stats.hp <= 0;
+            bool unitIsDead = unit.stats.hp <= 0;
             string errorMessage = "Unit.Attack():: selected unit is already dead";
             Debug.Assert(!unitIsDead, errorMessage);
             if (unitIsDead)
@@ -89,7 +113,7 @@ namespace StrategyGameDjikstraAlgo
 
         }
 
-        private void checkTargetToAttackIsNotNull(Unit unit)
+        private void CheckTargetToAttackIsNotNull(Unit unit)
         {
             string errorMessage = "Unit.Attack():: target to attack is null";
             Debug.Assert(unit != null, errorMessage);
@@ -97,39 +121,81 @@ namespace StrategyGameDjikstraAlgo
                 throw new GameException(errorMessage);
         }
 
-        private Coordinate GetUserInputForMovement()
+        private Coordinate GetUserInputForMovement(
+            Dictionary<Coordinate, Tuple<int, List<Coordinate>>> options)
         {
-            // <code>
+            // enumerate the options, print out to player
 
-            // call djikstra's algo
-            // then let the player choose among the options
+            foreach (KeyValuePair<Coordinate, Tuple<int, List<Coordinate>>> entry in options)
+            {
+                // do something with entry.Value or entry.Key
 
+                Coordinate option = entry.Key;
 
+                int costToOption = entry.Value.Item1;
+
+                List<Coordinate> pathToOption = entry.Value.Item2;
+
+                Console.WriteLine($"{option} ||| cost: {costToOption}, path: {String.Join(",", pathToOption)} ");
+            }
+
+            // let the player choose among the options
+
+            // accept two ints from keyboard separated by a space
+
+            Console.Write("Enter row number: ");
+            int r = int.Parse(Console.ReadLine()); //Converts str into the type int
+
+            Console.Write("Enter col number: ");
+            int c = int.Parse(Console.ReadLine()); //Converts str into the type int
+
+            Coordinate playerChoice = new Coordinate(r, c);
 
             // check the coord the player chose
             // is in the hashmap returned by Djikstra
             // before returning
 
-            // comment this out after implementing
-            return new Coordinate(0, 0); 
+            string errorMessage
+                = "Unit.GetUserInputForMovement():: inputted coord not in options";
+            Debug.Assert(options.ContainsKey(playerChoice));
+            if (!options.ContainsKey(playerChoice))
+                throw new GameException(errorMessage);
+
+            return playerChoice;
         }
 
-        private Coordinate GetUserInputForAttack()
+        private Coordinate GetUserInputForAttack(HashSet<Coordinate> options)
         {
-            // <code>
+            // enumerate the options, print out to player
 
-            // show coordinates of any attackable enemies
-            // (adjacent for now)
-            // then let the player choose among the options
+            foreach (Coordinate option in options)
+            {
+                Console.WriteLine($"{option} ||| name of unit: {board[option.r, option.c]}");
+            }
 
+            // let the player choose among the options
 
+            // accept two ints from keyboard separated by a space
 
-            // check the coord the player chose is valid before returning
+            Console.Write("Enter row number: ");
+            int r = int.Parse(Console.ReadLine()); //Converts str into the type int
 
+            Console.Write("Enter col number: ");
+            int c = int.Parse(Console.ReadLine()); //Converts str into the type int
 
+            Coordinate playerChoice = new Coordinate(r, c);
 
-            // comment this out after implementing
-            return new Coordinate(0, 0);
+            // check the coord the player chose
+            // is in the hashmap returned by Djikstra
+            // before returning
+
+            string errorMessage
+                = "Unit.GetUserInputForAttack():: inputted coord not in options";
+            Debug.Assert(options.Contains(playerChoice));
+            if (!options.Contains(playerChoice))
+                throw new GameException(errorMessage);
+
+            return playerChoice;
         }
     }
 }

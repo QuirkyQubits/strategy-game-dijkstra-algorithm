@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Web.Script.Serialization;
 using StrategyGameDjikstraAlgo;
 
@@ -13,7 +14,7 @@ public static class MainClass
             && coordinate.c >= 0 && coordinate.c <= cols - 1;
     }
 
-    public static Boolean inBounds(Coordinate coordinate, Tile[,] tiles)
+    public static Boolean inBounds<T>(Coordinate coordinate, T[,] tiles)
     {
         int rows = Util.GetRows(tiles);
         int cols = Util.GetCols(tiles);
@@ -162,6 +163,34 @@ public static class MainClass
 
 
     /// <summary>
+    /// Gets all adjacent tiles in bounds,
+    /// and depending on which team it is,
+    /// allows only coordinates with the other teams to be selected.
+    /// </summary>
+    /// <param name="tiles"></param>
+    /// <param name="startingCoordinate"></param>
+    public static IEnumerable<TileCoordinate> GetAllowableAdjacentTiles(
+        Tile[,] tiles,
+        Coordinate coord,
+        Unit[,] board,
+        Teams currentTeam)
+    {
+        foreach (TileCoordinate tileCoord in GetAdjacentTiles(tiles, coord))
+        {
+            Coordinate target = tileCoord.coordinate;
+
+            if (board[target.r, target.c] is null
+                || currentTeam == board[target.r, target.c].team)
+            {
+                yield return tileCoord;
+            }
+        }
+    }
+
+
+    [Obsolete("This method is deprecated, " +
+        "please use the overlaod with Unit parameter instead")]
+    /// <summary>
     /// Given an array of tiles and a starting coordinate,
     /// find all reachable tiles (and paths to get to those tiles).
     /// This is implemented using a modified form of Djikstra's algorithm.
@@ -247,6 +276,146 @@ public static class MainClass
         }
     }
 
+
+    /// <summary>
+    /// Given an array of tiles and a starting coordinate,
+    /// find all reachable tiles (and paths to get to those tiles).
+    /// This is implemented using a modified form of Djikstra's algorithm.
+    /// 
+    /// We return a dictionary of <option, tuple<cost-to-option, path-to-option>>.
+    /// </summary>
+    /// <param name="tiles"></param>
+    /// <param name="startCoord"></param>
+    public static Dictionary<Coordinate, Tuple<int, List<Coordinate>>> FindReachableTiles(
+        Unit unit,
+        Tile[,] tiles)
+    {
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+
+        int[,] dist = new int[rows, cols];
+        Coordinate[,] prev = new Coordinate[rows, cols];
+
+        var frontier = new MinHeap<TileCoordinateNode>();
+
+        TileCoordinate startTileCoordinate = new TileCoordinate(
+            tiles[unit.location.r, unit.location.c],
+            unit.location);
+
+        TileCoordinateNode startNode = new TileCoordinateNode(startTileCoordinate, 0);
+
+        frontier.Insert(startNode);
+
+        for (int r = 0; r < rows; ++r)
+        {
+            for (int c = 0; c < cols; ++c)
+            {
+                Coordinate coord = new Coordinate(r, c);
+
+                if (!coord.Equals(unit.location))
+                {
+                    dist[coord.r, coord.c] = int.MaxValue;
+                    prev[coord.r, coord.c] = null;
+                }
+                else
+                {
+                    dist[coord.r, coord.c] = 0;
+                    prev[coord.r, coord.c] = null; // doesn't matter for start coord
+                }
+            }
+        }
+
+        while (frontier.HeapSize() > 0)
+        {
+            TileCoordinateNode node = frontier.Pop();
+            TileCoordinate tileCoordinate = node.tileCoordinate;
+            Coordinate coordinate = tileCoordinate.coordinate;
+
+            foreach (TileCoordinate adjacentTileCoord
+                in GetAllowableAdjacentTiles(tiles, coordinate, unit.board, unit.team))
+            {
+                Coordinate adjacentCoord = adjacentTileCoord.coordinate;
+
+                // watch for overflow here
+                int calculatedDist = dist[coordinate.r, coordinate.c]
+                    + adjacentTileCoord.tile.movementCost;
+
+                bool calculatedDistPreferrable
+                    = dist[adjacentCoord.r, adjacentCoord.c] == int.MaxValue
+                    || calculatedDist < dist[adjacentCoord.r, adjacentCoord.c];
+
+                if (calculatedDistPreferrable && calculatedDist <= unit.movementPoints)
+                {
+                    dist[adjacentCoord.r, adjacentCoord.c] = calculatedDist;
+                    prev[adjacentCoord.r, adjacentCoord.c] = coordinate;
+
+                    TileCoordinateNode adjacentNode
+                        = new TileCoordinateNode(adjacentTileCoord, calculatedDist);
+
+                    if (!frontier.Contains(adjacentNode))
+                    {
+                        frontier.Insert(adjacentNode);
+                    }
+                    else
+                    {
+                        frontier.DecreaseKey(adjacentNode, adjacentNode);
+                    }
+                }
+            }
+        }
+
+        // djikstra finished
+        // now processing and adding to the return dict
+
+        var answer = new Dictionary<Coordinate, Tuple<int, List<Coordinate>>>();
+
+        for (int r = 0; r < rows; ++r)
+        {
+            for (int c = 0; c < cols; ++c)
+            {
+                Coordinate targetCoordinate = new Coordinate(r, c);
+                int distanceToTarget = dist[r, c];
+
+                // cell must also be empty, unless it is the starting coord
+                if (distanceToTarget != int.MaxValue
+                    && (targetCoordinate.Equals(unit.location)
+                    || unit.board[targetCoordinate.r, targetCoordinate.c] is null))
+                {
+                    /*
+                    Console.WriteLine($"Distance from {unit.currentLocation}" +
+                        $" to {targetCoordinate}" +
+                        $" is: {distanceToTarget}");
+                    */
+
+                    //string ans = targetCoordinate.ToString();
+                    List<Coordinate> pathToTarget = new List<Coordinate>();
+
+                    // all paths lead to the starting coordinate
+                    // and the starting coordinate's prev is null
+                    while (prev[targetCoordinate.r, targetCoordinate.c] != null)
+                    {
+                        // ans = $"{prev[targetCoordinate.r, targetCoordinate.c]}, {ans}";
+                        pathToTarget.Insert(0, prev[targetCoordinate.r, targetCoordinate.c]);
+
+                        targetCoordinate = prev[targetCoordinate.r, targetCoordinate.c];
+                    }
+
+                    Console.WriteLine(pathToTarget);
+
+                    answer.Add(
+                        targetCoordinate,
+                        new Tuple<int, List<Coordinate>>(
+                            distanceToTarget,
+                            pathToTarget)
+                        );
+                }
+            }
+        }
+
+        return answer;
+    }
+
+
     public static void ProcessResults(
         int rows,
         int cols,
@@ -317,7 +486,58 @@ public static class MainClass
         ProcessResults(ROWS, COLS, dist, prev, startingCoordinate);
     }
 
-    public static void RunMainSequence(
+    public static HashSet<Coordinate> FindAttackableTiles(
+        Unit unit,
+        Unit[,] board)
+    {
+        HashSet<Coordinate> answer = new HashSet<Coordinate>();
+
+        foreach (Coordinate adjCoord in GetAdjacentCoordinates(board, unit.location))
+        {
+            Unit adjacentUnit = board[adjCoord.r, adjCoord.c];
+
+            if (adjacentUnit != null && adjacentUnit.team != unit.team)
+                answer.Add(adjCoord);
+        }
+
+        return answer;
+    }
+
+
+    private static IEnumerable<Coordinate> GetAdjacentCoordinates(
+        Unit[,] board,
+        Coordinate coord)
+    {
+        const string errorMessage
+        = "MainClass::GetAdjacentCoordinates(): Specified coordinate not in bounds";
+
+        int rows = Util.GetRows(board);
+        int cols = Util.GetCols(board);
+
+        if (!inBounds(coord, board))
+            throw new MainClassException(errorMessage);
+
+        Debug.Assert(inBounds(coord, board), errorMessage);
+
+        Coordinate leftCoord = coord.Left();
+        Coordinate downCoord = coord.Down();
+        Coordinate rightCoord = coord.Right();
+        Coordinate upCoord = coord.Up();
+
+        if (inBounds(leftCoord, board))
+            yield return leftCoord;
+
+        if (inBounds(downCoord, board))
+            yield return downCoord;
+
+        if (inBounds(rightCoord, board))
+            yield return rightCoord;
+
+        if (inBounds(upCoord, board))
+            yield return upCoord;
+    }
+
+    private static void RunMainSequence(
         string pathToJsonFile,
         Coordinate startCoord,
         int movementPoints)
@@ -337,7 +557,7 @@ public static class MainClass
         ProcessResults(rows, cols, dist, prev, startCoord);
     }
 
-    public static void Main()
+    private static void Method1ToRunMainSequence()
     {
         string pathToExportFolder = Util.GetPathToExportFolder();
         string pathToJsonFile = $@"{pathToExportFolder}\strategy-game-export-4.json";
@@ -346,5 +566,9 @@ public static class MainClass
             pathToJsonFile,
             new Coordinate(1, 0),
             3);
+    }
+
+    public static void Main()
+    {
     }
 }
