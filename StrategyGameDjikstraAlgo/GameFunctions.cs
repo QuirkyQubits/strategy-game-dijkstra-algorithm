@@ -82,11 +82,11 @@ public static class GameFunctions
 
         if (readRows < 1)
         {
-            throw new MainClassException("MainClass::InitializeTiles(): readRows < 1");
+            throw new GameFunctionException("GameFunctions::InitializeTiles(): readRows < 1");
         }
         if (readCols < 1)
         {
-            throw new MainClassException("MainClass::InitializeTiles(): readCols < 1");
+            throw new GameFunctionException("GameFunctions::InitializeTiles(): readCols < 1");
         }
 
         Tile[,] tiles = new Tile[readRows, readCols];
@@ -115,7 +115,7 @@ public static class GameFunctions
                 }
                 else
                 {
-                    throw new MainClassException("MainClass::InitializeTiles(): unrecognized tileType");
+                    throw new GameFunctionException("GameFunctions::InitializeTiles(): unrecognized tileType");
                 }
             }
         }
@@ -133,13 +133,13 @@ public static class GameFunctions
         Coordinate coord)
     {
         const string errorMessage
-                = "MainClass::GetAdjacentTiles(): Specified coordinate not in bounds";
+                = "GameFunctions::GetAdjacentTiles(): Specified coordinate not in bounds";
 
         int rows = Util.GetRows(tiles);
         int cols = Util.GetCols(tiles);
 
         if (!inBounds(coord, tiles))
-            throw new MainClassException(errorMessage);
+            throw new GameFunctionException(errorMessage);
 
         Debug.Assert(inBounds(coord, tiles), errorMessage);
 
@@ -518,13 +518,13 @@ public static class GameFunctions
         Coordinate coord)
     {
         const string errorMessage
-        = "MainClass::GetAdjacentCoordinates(): Specified coordinate not in bounds";
+        = "GameFunctions::GetAdjacentCoordinates(): Specified coordinate not in bounds";
 
         int rows = Util.GetRows(board);
         int cols = Util.GetCols(board);
 
         if (!inBounds(coord, board))
-            throw new MainClassException(errorMessage);
+            throw new GameFunctionException(errorMessage);
 
         Debug.Assert(inBounds(coord, board), errorMessage);
 
