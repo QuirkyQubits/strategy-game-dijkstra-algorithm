@@ -64,7 +64,7 @@ namespace StrategyGameDjikstraAlgo
 
             CheckUnitIsNotDead(this);
 
-            var djikstraOptions = MainClass.FindReachableTiles(
+            var djikstraOptions = GameFunctions.FindReachableTiles(
                 this,
                 tiles);
 
@@ -85,7 +85,7 @@ namespace StrategyGameDjikstraAlgo
 
             CheckUnitIsNotDead(this);
 
-            HashSet<Coordinate> attackOptions = MainClass.FindAttackableTiles(
+            HashSet<Coordinate> attackOptions = GameFunctions.FindAttackableTiles(
                 this,
                 board);
 

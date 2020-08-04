@@ -17,7 +17,7 @@ namespace MainClassUnitTests
                 @"D:\CS\djikstra-problem\json-exports\strategy-game-export-3.json",
                 Encoding.UTF8);
 
-            Tile[,] tiles = MainClass.GetTiles(json);
+            Tile[,] tiles = GameFunctions.GetTiles(json);
             int rows = Util.GetRows(tiles);
             int cols = Util.GetCols(tiles);
             Unit[,] board = new Unit[rows, cols];
