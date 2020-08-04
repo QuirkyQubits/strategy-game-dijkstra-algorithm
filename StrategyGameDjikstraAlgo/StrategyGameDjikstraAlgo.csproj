@@ -37,6 +37,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums.cs" />
     <Compile Include="GameException.cs" />
     <Compile Include="Coordinate.cs" />
     <Compile Include="Game.cs" />

@@ -10,6 +10,7 @@ namespace MainClassUnitTests
     [TestClass]
     public class MainClassUnitTests
     {
+        /*
         [TestMethod]
         public void TestInitializeTiles1()
         {
@@ -26,5 +27,6 @@ namespace MainClassUnitTests
             Assert.AreEqual(1, tiles[1, 0].movementCost);
             Assert.AreEqual(2, tiles[1, 1].movementCost);
         }
+        */
     }
 }

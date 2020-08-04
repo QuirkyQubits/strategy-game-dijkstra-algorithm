@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="UnitUnitTests.cs" />
     <Compile Include="MaxHeapUnitTests.cs" />
     <Compile Include="MainClassUnitTests.cs" />
     <Compile Include="MinHeapUnitTests.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.Script.Serialization;
 using StrategyGameDjikstraAlgo;
 
@@ -373,13 +374,13 @@ public static class MainClass
         {
             for (int c = 0; c < cols; ++c)
             {
-                Coordinate targetCoordinate = new Coordinate(r, c);
+                Coordinate targetCoord = new Coordinate(r, c);
                 int distanceToTarget = dist[r, c];
 
                 // cell must also be empty, unless it is the starting coord
                 if (distanceToTarget != int.MaxValue
-                    && (targetCoordinate.Equals(unit.location)
-                    || unit.board[targetCoordinate.r, targetCoordinate.c] is null))
+                    && (targetCoord.Equals(unit.location)
+                    || unit.board[targetCoord.r, targetCoord.c] is null))
                 {
                     /*
                     Console.WriteLine($"Distance from {unit.currentLocation}" +
@@ -390,20 +391,24 @@ public static class MainClass
                     //string ans = targetCoordinate.ToString();
                     List<Coordinate> pathToTarget = new List<Coordinate>();
 
+                    Coordinate currentCoord = targetCoord;
+
                     // all paths lead to the starting coordinate
                     // and the starting coordinate's prev is null
-                    while (prev[targetCoordinate.r, targetCoordinate.c] != null)
+                    while (prev[currentCoord.r, currentCoord.c] != null)
                     {
                         // ans = $"{prev[targetCoordinate.r, targetCoordinate.c]}, {ans}";
-                        pathToTarget.Insert(0, prev[targetCoordinate.r, targetCoordinate.c]);
+                        pathToTarget.Insert(0, prev[currentCoord.r, currentCoord.c]);
 
-                        targetCoordinate = prev[targetCoordinate.r, targetCoordinate.c];
+                        currentCoord = prev[currentCoord.r, currentCoord.c];
                     }
 
-                    Console.WriteLine(pathToTarget);
+                    pathToTarget.Add(targetCoord);
+
+                    // Console.WriteLine($"path to {targetCoord}: {String.Join(", ", pathToTarget)}");
 
                     answer.Add(
-                        targetCoordinate,
+                        targetCoord,
                         new Tuple<int, List<Coordinate>>(
                             distanceToTarget,
                             pathToTarget)
@@ -568,7 +573,172 @@ public static class MainClass
             3);
     }
 
+    private static void GameTest1()
+    {
+        string json = File.ReadAllText(
+            @"D:\CS\djikstra-problem\json-exports\strategy-game-export-2.json",
+            Encoding.UTF8);
+
+        Tile[,] tiles = GetTiles(json);
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+        Unit[,] board = new Unit[rows, cols];
+
+        Unit unit1 = new Unit(
+            UnitTypes.Soldier,
+            3,
+            new Stats(10, 100),
+            new Coordinate(1, 1),
+            "player-unit-1",
+            Teams.Player,
+            ref board,
+            tiles);
+
+        Unit unit2 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(1, 6),
+            "enemy-unit-1",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        List<Unit> playerUnits = new List<Unit>();
+        List<Unit> enemyUnits = new List<Unit>();
+
+        playerUnits.Add(unit1);
+
+        enemyUnits.Add(unit2);
+
+        Game game = new Game(board, tiles, playerUnits, enemyUnits);
+
+        game.PlayGame();
+    }
+
+    private static void GameTest2()
+    {
+        string json = File.ReadAllText(
+            @"D:\CS\djikstra-problem\json-exports\strategy-game-export-2.json",
+            Encoding.UTF8);
+
+        Tile[,] tiles = GetTiles(json);
+        int rows = Util.GetRows(tiles);
+        int cols = Util.GetCols(tiles);
+        Unit[,] board = new Unit[rows, cols];
+
+        Unit playerUnit1 = new Unit(
+            UnitTypes.Soldier,
+            3,
+            new Stats(10, 100),
+            new Coordinate(0, 1),
+            "player-unit-1",
+            Teams.Player,
+            ref board,
+            tiles);
+
+        Unit playerUnit2 = new Unit(
+            UnitTypes.Soldier,
+            3,
+            new Stats(10, 100),
+            new Coordinate(1, 1),
+            "player-unit-2",
+            Teams.Player,
+            ref board,
+            tiles);
+
+        Unit playerUnit3 = new Unit(
+            UnitTypes.Soldier,
+            3,
+            new Stats(10, 100),
+            new Coordinate(2, 1),
+            "player-unit-3",
+            Teams.Player,
+            ref board,
+            tiles);
+
+        Unit playerUnit4 = new Unit(
+            UnitTypes.Soldier,
+            3,
+            new Stats(10, 100),
+            new Coordinate(1, 2),
+            "player-unit-4",
+            Teams.Player,
+            ref board,
+            tiles);
+
+        Unit enemyUnit1 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(1, 6),
+            "enemy-unit-1",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        Unit enemyUnit2 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(2, 6),
+            "enemy-unit-2",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        Unit enemyUnit3 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(3, 6),
+            "enemy-unit-3",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        Unit enemyUnit4 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(2, 5),
+            "enemy-unit-4",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        Unit enemyUnit5 = new Unit(
+            UnitTypes.Seaman,
+            5,
+            new Stats(30, 70),
+            new Coordinate(3, 5),
+            "enemy-unit-5",
+            Teams.Enemy,
+            ref board,
+            tiles);
+
+        List<Unit> playerUnits = new List<Unit>();
+        List<Unit> enemyUnits = new List<Unit>();
+
+        playerUnits.Add(playerUnit1);
+        playerUnits.Add(playerUnit2);
+        playerUnits.Add(playerUnit3);
+        playerUnits.Add(playerUnit4);
+
+        enemyUnits.Add(enemyUnit1);
+        enemyUnits.Add(enemyUnit2);
+        enemyUnits.Add(enemyUnit3);
+        enemyUnits.Add(enemyUnit4);
+        enemyUnits.Add(enemyUnit5);
+
+        Game game = new Game(board, tiles, playerUnits, enemyUnits);
+
+        game.PlayGame();
+    }
+
     public static void Main()
     {
+        // GameTest1();
+        GameTest2();
     }
 }

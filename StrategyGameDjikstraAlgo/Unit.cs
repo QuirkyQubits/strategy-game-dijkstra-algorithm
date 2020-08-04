@@ -28,7 +28,7 @@ namespace StrategyGameDjikstraAlgo
             string name,
             Teams team,
 
-            Unit[,] board,
+            ref Unit[,] board,
             Tile[,] tiles)
         {
             
@@ -40,6 +40,8 @@ namespace StrategyGameDjikstraAlgo
             this.team = team;
 
             this.board = board;
+            board[location.r, location.c] = this;
+
             this.tiles = tiles;
         }
 
@@ -57,6 +59,8 @@ namespace StrategyGameDjikstraAlgo
 
         //moves the unit around the gameBoard
         private void Move() {
+
+            Console.WriteLine("In Unit::Move()");
 
             CheckUnitIsNotDead(this);
 
@@ -77,6 +81,8 @@ namespace StrategyGameDjikstraAlgo
 
         private void Attack() {
 
+            Console.WriteLine("In Unit::Attack()");
+
             CheckUnitIsNotDead(this);
 
             HashSet<Coordinate> attackOptions = MainClass.FindAttackableTiles(
@@ -94,6 +100,8 @@ namespace StrategyGameDjikstraAlgo
                 CheckUnitIsNotDead(unitToAttack);
 
                 unitToAttack.stats.hp -= stats.atk;
+
+                Console.WriteLine($"{name} dealt {stats.atk} damage to {unitToAttack.name}");
 
                 if (unitToAttack.Dead())
                 {
@@ -136,7 +144,7 @@ namespace StrategyGameDjikstraAlgo
 
                 List<Coordinate> pathToOption = entry.Value.Item2;
 
-                Console.WriteLine($"{option} ||| cost: {costToOption}, path: {String.Join(",", pathToOption)} ");
+                Console.WriteLine($"{option} ||| cost: {costToOption}, path: {String.Join(", ", pathToOption)} ");
             }
 
             // let the player choose among the options
@@ -196,6 +204,11 @@ namespace StrategyGameDjikstraAlgo
                 throw new GameException(errorMessage);
 
             return playerChoice;
+        }
+
+        public override string ToString()
+        {
+            return $"{name}";
         }
     }
 }

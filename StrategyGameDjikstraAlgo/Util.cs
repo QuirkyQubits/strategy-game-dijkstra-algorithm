@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StrategyGameDjikstraAlgo
 {
-    static class Util
+    public static class Util
     {
         public static void Swap<T> (ref T lhs, ref T rhs)
         {
