@@ -80,7 +80,7 @@ This simulation consumes map files exported from the [Strategy Game Level Creato
 1. Clone this repo  
    ```bash
    git clone https://github.com/QuirkyQubits/strategy-game-dijkstra-algorithm.git
-   cd strategy-game-djikstra-algorithm
+   cd strategy-game-dijkstra-algorithm
    ```
 
 2. Place a valid `map.json` file (exported from the [Level Creator](https://github.com/QuirkyQubits/strategy-game-tool)) into the root of the project folder.
