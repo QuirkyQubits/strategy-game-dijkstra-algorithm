@@ -79,7 +79,7 @@ This simulation consumes map files exported from the [Strategy Game Level Creato
 
 1. Clone this repo  
    ```bash
-   git clone https://github.com/QuirkyQubits/strategy-game-djikstra-algorithm.git
+   git clone https://github.com/QuirkyQubits/strategy-game-dijkstra-algorithm.git
    cd strategy-game-djikstra-algorithm
    ```
 
