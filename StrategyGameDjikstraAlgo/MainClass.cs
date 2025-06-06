@@ -9,53 +9,10 @@ namespace StrategyGameDjikstraAlgo
 {
     class MainClass
     {
-        private static void GameTest1()
+        private static void GameTest()
         {
             string json = File.ReadAllText(
-                @"D:\CS\djikstra-problem\json-exports\strategy-game-export-2.json",
-                Encoding.UTF8);
-
-            Tile[,] tiles = GameFunctions.GetTiles(json);
-            int rows = Util.GetRows(tiles);
-            int cols = Util.GetCols(tiles);
-            Unit[,] board = new Unit[rows, cols];
-
-            Unit unit1 = new Unit(
-                UnitTypes.Soldier,
-                3,
-                new Stats(10, 100),
-                new Coordinate(1, 1),
-                "player-unit-1",
-                Teams.Player,
-                ref board,
-                tiles);
-
-            Unit unit2 = new Unit(
-                UnitTypes.Seaman,
-                5,
-                new Stats(30, 70),
-                new Coordinate(1, 6),
-                "enemy-unit-1",
-                Teams.Enemy,
-                ref board,
-                tiles);
-
-            List<Unit> playerUnits = new List<Unit>();
-            List<Unit> enemyUnits = new List<Unit>();
-
-            playerUnits.Add(unit1);
-
-            enemyUnits.Add(unit2);
-
-            Game game = new Game(board, tiles, playerUnits, enemyUnits);
-
-            game.PlayGame();
-        }
-
-        private static void GameTest2()
-        {
-            string json = File.ReadAllText(
-                @"D:\CS\djikstra-problem\json-exports\strategy-game-export-2.json",
+                @"D:\CS\djikstra-problem\json-exports\strategy-game-export.json",
                 Encoding.UTF8);
 
             Tile[,] tiles = GameFunctions.GetTiles(json);
@@ -173,7 +130,7 @@ namespace StrategyGameDjikstraAlgo
         }
 
         public static void Main() { 
-            GameTest2();
+            GameTest();
         }
     }
 }
