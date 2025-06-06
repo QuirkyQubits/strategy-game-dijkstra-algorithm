@@ -1,68 +1,85 @@
 # 🧠 Strategy Game Simulation Engine (Dijkstra Reference)
 
-This project is a minimal, console-based simulation that demonstrates how to implement **grid-based movement and combat logic** for a strategy game. It is designed as a **reference consumer** of exported JSON maps from the [Strategy Game Level Creator](https://github.com/QuirkyQubits/strategy-game-tool), showcasing how to:
+This project is a minimal, console-based simulation demonstrating how to implement **grid-based movement and turn-based combat** for a strategy game. It acts as a **reference implementation** for consuming exported JSON maps from the [Strategy Game Level Creator](https://github.com/QuirkyQubits/strategy-game-tool). It showcases how to:
 
 - Parse terrain-based map data from JSON
-- Apply a shortest-path algorithm (Dijkstra's) to compute valid movement tiles
-- Simulate simple turn-based combat between units
+- Use Dijkstra’s algorithm to compute valid movement tiles
+- Simulate basic turn-based combat between units
 
 ---
 
 ## 🌟 Purpose
 
-This simulation was built as a **proof of concept** to validate the JSON export format from the frontend level editor and to show how movement logic could be used inside a real game engine (e.g., Unity or Unreal).
+This simulation was built as a **proof of concept** to validate the JSON export format from the frontend level editor. It also demonstrates how this movement logic could be integrated into a game engine like Unity or Unreal.
 
-Rather than serving as a full-featured engine, this project demonstrates:
+Rather than being a full-featured engine, it focuses on:
 
-- How terrain-aware movement is computed
-- How units can be placed and moved on a grid
-- How turn-based combat mechanics could be layered on top
+- Terrain-aware movement calculations
+- Grid placement and unit movement
+- A basic turn-based combat loop
 
 ---
 
 ## 🔍 Key Features
 
-- ✅ Reads a tile grid from JSON (terrain type + movement cost)
-- ✅ Implements Dijkstra's algorithm to calculate reachable tiles
-- ✅ Includes a combat loop between hardcoded units
-- ✅ Designed to be easily portable or translated into other languages
+- ✅ Reads a terrain grid from JSON (terrain type + movement cost)
+- ✅ Implements Dijkstra’s algorithm for movement pathfinding
+- ✅ Includes a simple combat loop between hardcoded units
+- ✅ Clean, modular C# code for easy reuse or extension
 
 ---
 
 ## 📁 Core Files
 
-| File | Description |
-|------|-------------|
-| `GameFunctions.cs` | Contains the core Dijkstra algorithm for computing valid movement tiles |
-| `Program.cs` | Main simulation loop - hardcodes units and drives the battle |
-| `Unit.cs` | Defines unit stats and behavior |
-| `Tile.cs` / `Grid.cs` | Represent the map and terrain system |
+| File              | Description                                                         |
+|-------------------|---------------------------------------------------------------------|
+| `MainClass.cs`    | Entry point and main simulation loop (loads map, runs combat logic) |
+| `GameFunctions.cs`| Core Dijkstra algorithm for computing reachable tiles               |
+| `Unit.cs`         | Defines unit stats and combat behavior                              |
+| `Tile.cs`         | Represents the map and terrain system                               |
 
 ---
 
-## 🤖 How Units Are Initialized
+## 🧍 Unit Initialization
 
-This project currently **does not parse units from JSON**. Instead, units are manually hardcoded in `Program.cs` for simplicity:
+Units are currently initialized manually inside `MainClass.cs` using a single method `GameTest()` which defines both player and enemy units:
 
 ```csharp
-Unit knight = new Unit("Knight", 3, 10, 1, 1);
-Unit goblin = new Unit("Goblin", 2, 6, 1, 1);
+List<Unit> playerUnits = new List<Unit>();
+playerUnits.Add(playerUnit1);
+...
 
-grid.AddUnit(knight, 0, 0);
-grid.AddUnit(goblin, 4, 4);
+List<Unit> enemyUnits = new List<Unit>();
+enemyUnits.Add(enemyUnit1);
+enemyUnits.Add(enemyUnit2);
+...
+
+Game game = new Game(board, tiles, playerUnits, enemyUnits);
+game.PlayGame();
 ```
 
-Please note that if you wish to modify the initial placement of units, you currently have to do it in the code.
+All units are instantiated and added within this method. To change unit types, stats, or positions, modify the definitions in `MainClass.cs`.
+
+> ⚠️ Units are currently **not** loaded from JSON.
 
 ---
 
 ## 🔗 Integration with Level Creator
 
-This simulation consumes map files exported from the [Strategy Game Level Creator](https://github.com/QuirkyQubits/strategy-game-tool), a browser-based level editor. You can:
+This simulation consumes map files exported from the [Strategy Game Level Creator](https://github.com/QuirkyQubits/strategy-game-tool).
 
-1. Draw a level in the editor
-2. Export the JSON
-3. Place the file in this repo and load it at runtime
+To use it:
+
+1. Open the web-based level creator
+2. Design your level
+3. Export the file (e.g. `strategy-game-export.json`)
+4. Place the exported JSON in the project root
+
+📍 **Note:** The simulation expects the file to be named:
+```
+strategy-game-export.json
+```
+If your file has a different name, either rename it or update the path in `MainClass.cs`.
 
 ---
 
@@ -70,37 +87,35 @@ This simulation consumes map files exported from the [Strategy Game Level Creato
 
 ### Prerequisites
 
-- ✅ [.NET SDK (C#)](https://dotnet.microsoft.com/en-us/download) installed (version 6.0 or later recommended)
-- ✅ Visual Studio or any C#-compatible IDE (optional)
+- ✅ [.NET 6+ SDK](https://dotnet.microsoft.com/en-us/download)
+- ✅ Any C#-compatible IDE (e.g., Visual Studio, JetBrains Rider, VS Code)
 
 ---
 
-### Run via CLI
+### Run via Command Line
 
-1. Clone this repo  
-   ```bash
-   git clone https://github.com/QuirkyQubits/strategy-game-dijkstra-algorithm.git
-   cd strategy-game-dijkstra-algorithm
-   ```
+```bash
+git clone https://github.com/QuirkyQubits/strategy-game-dijkstra-algorithm.git
+cd strategy-game-dijkstra-algorithm
+```
 
-2. Place a valid `map.json` file (exported from the [Level Creator](https://github.com/QuirkyQubits/strategy-game-tool)) into the root of the project folder.
+Place your exported JSON file (`strategy-game-export.json`) into the project root, then run:
 
-3. Run the simulation:  
-   ```bash
-   dotnet run
-   ```
+```bash
+dotnet run --project StrategyGameDjikstraAlgo
+```
 
 ---
 
-### Or Run via Visual Studio
+### Run via Visual Studio
 
-1. Open the solution file in Visual Studio  
-2. Ensure your exported `map.json` is present in the working directory  
+1. Open the solution in Visual Studio
+2. Ensure `strategy-game-export.json` is present in the project directory
 3. Press ▶️ Run
 
 ---
 
-## 💪 Future Improvements
+## 🚧 Future Improvements
 
 - [ ] Load unit data from JSON
 - [ ] Add unit teams and AI behaviors
